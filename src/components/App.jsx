@@ -1,4 +1,4 @@
-import { Component, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { ContactForm } from 'components/ContactForm/ContactForm';
 import { ContactList } from 'components/ContactList/ContactList';
@@ -6,8 +6,16 @@ import { Filter } from 'components/Filter/Filter';
 
 const LS_KEY = 'list_phonebook';
 
+const getInitialNumbers = () => {
+  const savedItems = JSON.parse(localStorage.getItem(LS_KEY));
+  if (savedItems !== null) {
+    return savedItems;
+  }
+  return [];
+};
+
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState(getInitialNumbers);
   const [filter, setFilter] = useState('');
 
   const addContact = (name, number) => {
@@ -24,8 +32,24 @@ export const App = () => {
   };
 
   const changeFilter = e => {
-    setFilter( e.currentTarget.value );
+    setFilter(e.currentTarget.value);
   };
+
+  const getVisibleContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
+  };
+
+  useEffect(
+    prevContacts => {
+      if (prevContacts !== contacts) {
+        localStorage.setItem(LS_KEY, JSON.stringify(contacts));
+      }
+    },
+    [contacts]
+  );
 
   return (
     <div>
@@ -33,52 +57,8 @@ export const App = () => {
       <ContactForm contacts={contacts} onSubmit={addContact} />
       <h2>Contacts</h2>
       <Filter value={filter} onCnange={changeFilter} />
-      <ContactList onDelete={deleteContact} contacts={contacts} />
-      {/* <ContactList onDelete={this.deleteContact} contacts={filteredContacts} /> */}
+
+      <ContactList onDelete={deleteContact} contacts={getVisibleContacts()} />
     </div>
   );
-
-  // state = {
-  //   contacts: [],
-  //   filter: '',
-  // };
-  // addContact = (name, number) => {
-  //   const contact = {
-  //     id: nanoid(),
-  //     name,
-  //     number,
-  //   };
-  //   this.setState(({ contacts }) => ({
-  //     contacts: [contact, ...contacts],
-  //   }));
-  // };
-  // deleteContact = id => {
-  //   this.setState(({ contacts }) => ({
-  //     contacts: contacts.filter(contact => contact.id !== id),
-  //   }));
-  // };
-  // changeFilter = e => {
-  //   this.setState({ filter: e.currentTarget.value });
-  // };
-  // getVisibleContacts = () => {
-  //   const { contacts, filter } = this.state;
-  //   const normalizedFilter = filter.toLowerCase();
-  //   return contacts.filter(contact =>
-  //     contact.name.toLowerCase().includes(normalizedFilter)
-  //   );
-  // };
-  // componentDidMount() {
-  //   const savedItems = JSON.parse(localStorage.getItem(LS_KEY));
-  //   if (savedItems !== null) {
-  //     this.setState({ contacts: savedItems });
-  //     return;
-  //   }
-  //   this.setState({ contacts: [] });
-  // }
-  // componentDidUpdate(prevProps, { contacts: prevContacts }) {
-  //   const { contacts: newContacts } = this.state;
-  //   if (prevContacts !== newContacts) {
-  //     localStorage.setItem(LS_KEY, JSON.stringify(newContacts));
-  //   }
-  // }
 };
