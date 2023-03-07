@@ -47,7 +47,7 @@ export const ContactForm = ({ onSubmit, contacts }) => {
   );
 };
 
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func,
-  contacts: PropTypes.arrayOf(PropTypes.shape()),
-};
+// ContactForm.propTypes = {
+//   onSubmit: PropTypes.func,
+//   contacts: PropTypes.arrayOf(PropTypes.shape()),
+// };
